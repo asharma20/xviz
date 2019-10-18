@@ -16,6 +16,7 @@ import {Log} from 'probe.gl';
 import {XVIZServer} from '../server/xviz-server';
 import {XVIZProviderHandler} from '../server/xviz-provider-handler';
 import {XVIZProviderFactory} from '@xviz/io';
+import {XVIZNodProvider} from '@xviz/nod';
 
 // For default command automatically support scenarios
 import {ScenarioProvider} from '../scenarios';
@@ -64,7 +65,6 @@ export function serverArgs(inArgs, {defaultCommand = false} = {}) {
         alias: 'd',
         describe: 'Data directory source.  Multiple directories are supported',
         type: 'string',
-        required: true,
         group: 'Hosting Options:'
       },
       port: {
@@ -75,6 +75,30 @@ export function serverArgs(inArgs, {defaultCommand = false} = {}) {
         alias: 'v',
         count: true,
         describe: 'Logging level'
+      },
+      sinkurl: {
+        alias: 's',
+        describe: 'Websocket url of data sink server',
+        type: 'string',
+        default: 'ws://localhost:9998'
+      },
+      reconnect: {
+        alias: 'r',
+        describe: 'The duration in ns to wait between attempts to reconnect',
+        type: 'number',
+        default: 500
+      },
+      encoding: {
+        alias: 'e',
+        describe: 'Type of image encoding',
+        type: 'string',
+        default: 'jpg'
+      },
+      stroke: {
+        alias: 't',
+        describe: 'Stroke width of trajectory',
+        type: 'number',
+        default: 1
       }
     },
     serverCmd
@@ -103,6 +127,7 @@ export function serverCmd(args) {
   if (args.scenarios) {
     XVIZProviderFactory.addProviderClass(ScenarioProvider);
   }
+  XVIZProviderFactory.addProviderClass(XVIZNodProvider, options);
 
   const handler = new XVIZProviderHandler(XVIZProviderFactory, options);
   const wss = new XVIZServer([handler], options, () => {

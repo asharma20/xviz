@@ -516,7 +516,7 @@ function joinObjectPointCloudsToTypedArrays(objects) {
 
   let vertexColorStride = null;
 
-  const positions = new Float32Array(numInstances * 3);
+  const positions = new Float64Array(numInstances * 3);
   const colors = new Uint8ClampedArray(numInstances * 4);
 
   // Store object ids to enable recoloring.

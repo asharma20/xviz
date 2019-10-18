@@ -45,7 +45,7 @@ export class XVIZProviderSession {
     this._setupSocket();
     this._setupMiddleware();
 
-    this.handler = new XVIZMessageToMiddleware(this.middleware);
+    this.handler = new XVIZMessageToMiddleware(this.middleware, this.options);
   }
 
   log(msg, ...args) {
@@ -69,6 +69,11 @@ export class XVIZProviderSession {
 
     this.socket.onclose = event => {
       this._onSocketClose(event);
+      this.socket.close();
+      const handler = this.provider['close'];
+      if (handler) {
+        this.provider.close();
+      }
     };
 
     this.socket.onopen = () => {

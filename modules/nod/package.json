@@ -1,0 +1,39 @@
+{
+  "name": "@xviz/nod",
+  "description": "Module for converting nod data into XVIZ and sending to visualizer",
+  "license": "Apache-2.0",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/xviz.git"
+  },
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@xviz/builder": "1.0.0",
+    "@xviz/io": "1.0.0",
+    "lodash": "^4.17.11",
+    "yargs": "^13.2.2",
+    "nanomsg": "^4.1.0"
+  },
+  "scripts": {
+    "clean": "rm -fr dist && mkdir -p dist"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "babel-polyfill": "^6.26.0"
+  },
+  "engines": {
+    "node": ">= 10.16",
+    "npm": ">= 6",
+    "yarn": ">= 1.10.0"
+  }
+}

@@ -28,25 +28,36 @@ export class XVIZProviderHandler {
   async newSession(socket, req) {
     let provider = null;
 
-    const dirs = Array.isArray(this.options.d) ? this.options.d : [this.options.d];
-    for (let i = 0; i < dirs.length; i++) {
-      // Root is used by some XVIZ providers
-      const root = path.join(dirs[i], req.path);
+    if (this.options.d) {
+      const dirs = Array.isArray(this.options.d) ? this.options.d : [this.options.d];
+      for (let i = 0; i < dirs.length; i++) {
+        // Root is used by some XVIZ providers
+        const root = path.join(dirs[i], req.path);
 
-      // FileSource is used for a JSON/BINARY providers
+        // FileSource is used for a JSON/BINARY providers
+        const source = new FileSource(root);
+        // TODO: reconsile cli options with request options
+        provider = await this.factory.open({
+          source,
+          options: {...req.params, logger: this.options.logger},
+          root
+        });
+
+        if (provider) {
+          break;
+        }
+      }
+    } else {
+      const root = "";
       const source = new FileSource(root);
-
-      // TODO: reconsile cli options with request options
       provider = await this.factory.open({
         source,
         options: {...req.params, logger: this.options.logger},
-        root
+        root,
+        socket
       });
-
-      if (provider) {
-        break;
-      }
     }
+
 
     if (provider) {
       return new XVIZProviderSession(socket, req, provider, {

@@ -56,6 +56,21 @@ export function postDeserialize(message) {
 
   for (const streamName in streams) {
     const objects = streams[streamName];
+    if (streamName == '/vehicle_pose') {
+      if (!times.includes(timestamp) && !objects.position.includes(Number.MAX_VALUE)) {
+        if (poses.length == 0 || distance(objects.position, poses[poses.length-1]) > threshold) {
+          times.push(timestamp);
+          poses.push(objects.position);
+        }
+      }
+    }
+    if (streamName == '/vehicle/trajectory') {
+      if (!objects.features.length) {
+        objects.features.push({'type' : 'polyline'});
+      }
+      objects.features[0].vertices = poses;
+      objects.vertices = poses;
+    }
     if (objects.features && objects.features.length && objects.features[0].id) {
       observeObjects(objects, timestamp);
     }

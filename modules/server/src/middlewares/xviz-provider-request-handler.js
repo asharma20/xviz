@@ -83,7 +83,9 @@ export class XVIZProviderRequestHandler {
 
     // send metadata
     const metadata = this.provider.xvizMetadata();
-    this.middleware.onMetadata(metadata);
+    if (metadata) {
+      this.middleware.onMetadata(metadata);
+    }
   }
 
   _setupTransformMetrics() {
