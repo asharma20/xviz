@@ -18,7 +18,15 @@
 import {XVIZ_MESSAGE_TYPE} from '../constants';
 import {getXVIZConfig} from '../config/xviz-config';
 import XVIZObject from '../objects/xviz-object';
-
+var poses = [];
+var times = [];
+var threshold = 0.1;
+function distance(v1, v2) {
+  var dx = v1[0] - v2[0];
+  var dy = v1[1] - v2[1];
+  var dz = v1[2] - v2[2];
+  return Math.sqrt( dx * dx + dy * dy + dz * dz );
+}
 /**
  * placeholder
  */
@@ -42,6 +50,8 @@ function observeObjects(objects, timestamp) {
  */
 export function postDeserialize(message) {
   if (message.type !== XVIZ_MESSAGE_TYPE.TIMESLICE) {
+    poses = [];
+    times = [];
     return message;
   }
 

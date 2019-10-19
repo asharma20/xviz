@@ -50,6 +50,34 @@ export class XVIZNodConverter {
     ];
   }
 
+  _parsePose(message_data) {
+    // Expects pose data: datatype, timestamp, pose (px py pz qx qy qz qw)
+    var offset = 1;
+    var pose = [];
+    pose.push(parseInt(message_data.readBigUInt64LE(offset)));
+    offset = offset + 8;
+    while (offset < message_data.length) {
+      pose.push(message_data.readDoubleLE(offset));
+      offset = offset + 8;
+    }
+    return pose;
+  }
+
+  _parseImage(message_data) {
+    // Expects camera data: datatype, timestamp, rows, cols, channels, image
+    var offset = 1;
+    const timestamp = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const rows = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const cols = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const channels = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const imageData = message_data.subarray(offset);
+    return { timestamp, rows, cols, channels, imageData };
+  }
+
   async convertMessage(message_data, datatype) {
     // The XVIZBuilder provides a fluent API to construct objects.
     // This makes it easier to incrementally build objects that may have
@@ -59,50 +87,28 @@ export class XVIZNodConverter {
       disabledStreams: this.disabledStreams
     });
 
-    var pose = [];
-    var image = {};
-    var datatype = message_data.readUInt8(0);
-    var offset = 1; // byte offset
-    if (datatype == 1) {
-      // Expects pose data: datatype, timestamp, pose (px py pz qx qy qz qw)
-      pose.push(parseInt(message_data.readBigUInt64LE(offset)));
-      offset = offset + 8;
-      while (offset < message_data.length) {
-        pose.push(message_data.readDoubleLE(offset));
-        offset = offset + 8;
-      }
-    } else {
-      // Expects camera data: datatype, timestamp, rows, cols, channels, image
-      const timestamp = parseInt(message_data.readBigUInt64LE(offset));
-      offset = offset + 8;
-      const rows = parseInt(message_data.readBigUInt64LE(offset));
-      offset = offset + 8;
-      const cols = parseInt(message_data.readBigUInt64LE(offset));
-      offset = offset + 8;
-      const channels = parseInt(message_data.readBigUInt64LE(offset));
-      offset = offset + 8;
-      const image_data_buffer = message_data.subarray(offset);
-
-      image = {
-                timestamp : timestamp,
-                rows : rows,
-                cols : cols,
-                channels : channels,
-                imageData : image_data_buffer
-              };
-    }
-
-    var message = {pose: pose, image: image};
-    // As builder instance is shared across all the converters, to avoid race conditions',
-    // Need wait for each converter to finish
-    for (let i = 0; i < this.converters.length; i++) {
-      await this.converters[i].convertMessage(message, xvizBuilder);
-    }
-
     try {
+      // Parse raw buffer message into format
+      var pose = [];
+      var image = {};
+      var datatype = message_data.readUInt8(0);
+      if (datatype == 1) {
+        pose = this._parsePose(message_data);
+      } else {
+        image = this._parseImage(message_data);
+      }
+      var message = {pose: pose, image: image};
+
+      // As builder instance is shared across all the converters, to avoid race conditions',
+      // Need wait for each converter to finish
+      for (let i = 0; i < this.converters.length; i++) {
+        await this.converters[i].convertMessage(message, xvizBuilder);
+      }
+
       const frm = xvizBuilder.getMessage();
       return frm;
     } catch (err) {
+      console.log(err);
       return null;
     }
   }

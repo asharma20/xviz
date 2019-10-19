@@ -19,8 +19,8 @@ Start live XVIZ server:
 
 ```bash
 # Start server
-$ ./bin/xvizserver --live --port [visualizer port] -s [url of incoming data]
-$ ./bin/xvizserver --live --port 8081 -s 'ws://localhost:9997'
+$ ./modules/server/bin/babel-xvizserver --live --port [visualizer port] -s [url of incoming data]
+$ ./modules/server/bin/babel-xvizserver --live --port 8081 -s 'ws://localhost:9997'
 
 ```
 

@@ -143,9 +143,9 @@ export class NodGPSConverter {
       // It is possible to apply inline styling on individual objects.
       .streamStyle({
         stroke_color: '#79FFBC', //'#47B27588',
-        stroke_width: this.options.strokewidth,
-        stroke_width_min_pixels: this.options.strokewidth,
-        stroke_width_max_pixels: this.options.strokewidth+0.2,
+        stroke_width: this.options.stroke,
+        stroke_width_min_pixels: this.options.stroke,
+        stroke_width_max_pixels: this.options.stroke+0.2,
       });
   }
 }
