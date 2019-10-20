@@ -17,7 +17,7 @@ import {getDeclarativeUI} from './declarative-ui';
 import {XVIZBuilder, XVIZMetadataBuilder} from '@xviz/builder';
 
 export class XVIZNodConverter {
-  constructor(options, {disabledStreams, fakeStreams, imageMaxWidth = 320, imageMaxHeight = 200}) {
+  constructor(options, {disabledStreams, fakeStreams, imageMaxWidth = 160, imageMaxHeight = 100}) {
     this.options = options;
     this.disabledStreams = disabledStreams;
     this.fakeStreams = fakeStreams;

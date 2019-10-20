@@ -78,8 +78,10 @@ export function postDeserialize(message) {
       if (!objects.features.length) {
         objects.features.push({'type' : 'polyline'});
       }
-      objects.features[0].vertices = poses;
-      objects.vertices = poses;
+      if (poses) {
+        objects.features[0].vertices = poses;
+        objects.vertices = poses;
+      }
     }
     if (objects.features && objects.features.length && objects.features[0].id) {
       observeObjects(objects, timestamp);

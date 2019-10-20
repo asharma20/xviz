@@ -13,6 +13,14 @@ $ cd xviz
 
 # Install dependencies
 $ yarn bootstrap
+
+# Link parser to streetscape.gl
+$ cd modules/parser
+$ npm link
+$ cd streetscape.gl
+$ npm link @xviz/parser
+$ cd examples/website-demo
+$ npm link @xviz/parser
 ```
 
 Start live XVIZ server:
