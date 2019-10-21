@@ -11,17 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+const sharp = require('sharp');
+
 export class NodImageConverter {
   constructor(camera = 'image_00', imageOptions, options = {}) {
     this.streamName = `/camera/${camera}`;
     this.options = options;
     this.encoding = this.options.encoding;
     this.imageOptions = imageOptions;
+    const buf = new Buffer(this.imageOptions.maxWidth * this.imageOptions.maxHeight * 3);
     this.prevImage = {
       cols : this.imageOptions.maxWidth,
       rows : this.imageOptions.maxHeight,
-      imageData : Buffer.alloc(this.imageOptions.maxWidth*this.imageOptions.maxHeight)
+      imageData : buf
     };
+    this.isRawBuffer = true;
   }
 
   log(...msg) {
@@ -34,6 +38,17 @@ export class NodImageConverter {
   async convertMessage(message, xvizBuilder) {
     var image;
     if (Object.keys(message.image).length === 0 && message.image.constructor === Object) {
+      if (this.isRawBuffer) {
+        this.prevImage.imageData = await sharp(this.prevImage.imageData, {
+            raw: {
+                width: this.imageOptions.maxWidth,
+                height: this.imageOptions.maxHeight,
+                channels: 3
+            }
+          })
+          .jpeg()
+          .toBuffer();
+      }
       image = this.prevImage;
     } else {
       image = message.image;
@@ -50,6 +65,7 @@ export class NodImageConverter {
       .image(nodeBufferToTypedArray(imageData), this.encoding)
       .dimensions(width, height);
     this.prevImage = image;
+    this.isRawBuffer = false;
   }
 
   getMetadata(xvizMetaBuilder) {

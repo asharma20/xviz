@@ -2,7 +2,7 @@
 
 Converts raw buffer pose, image data into xviz data and sends to visualizer.
 
-## Quick start
+## Server quick start
 
 You need [Node.js](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/lang/en/docs/install) to
 run the examples.
@@ -11,10 +11,10 @@ run the examples.
 # Clone XVIZ
 $ cd xviz
 
-# Install dependencies
+# Install dependencies and build
 $ yarn bootstrap
 
-# Link parser to streetscape.gl
+# Link custom xviz parser to streetscape.gl for visualizer
 $ cd modules/parser
 $ npm link
 $ cd streetscape.gl
@@ -32,7 +32,27 @@ $ ./modules/server/bin/babel-xvizserver --live --port 8081 -s 'ws://localhost:99
 
 ```
 
+## Visualizer
+
+```bash
+# Clone streetscape.gl
+$ cd streetscape.gl
+
+# Install dependencies and build
+$ yarn bootstrap
+```
+
+Start live XVIZ client:
+
+```bash
+# Start client
+$ cd streetscape.gl/examples/website-demo/
+$ yarn start-live-local
+$ yarn start-live-local [--env.port=port number] [--env.maxConcurrency=number of workers]
+
+```
+
 ## NPM Scripts
 
-- `bootstrap` - install dependencies
+- `bootstrap` - install dependencies and build
 - `build` - rebuild all modules
