@@ -52,7 +52,7 @@ export class XVIZNodConverter {
 
   _parsePose(message_data) {
     // Expects pose data: datatype, timestamp, pose (px py pz qx qy qz qw)
-    var offset = 1;
+    var offset = 2;
     var pose = [];
     pose.push(parseInt(message_data.readBigUInt64LE(offset)));
     offset = offset + 8;
@@ -65,15 +65,15 @@ export class XVIZNodConverter {
 
   _parseImage(message_data) {
     // Expects camera data: datatype, timestamp, rows, cols, channels, image
-    var offset = 1;
+    var offset = 2;
     const timestamp = parseInt(message_data.readBigUInt64LE(offset));
     offset = offset + 8;
     const rows = parseInt(message_data.readBigUInt64LE(offset));
     offset = offset + 8;
     const cols = parseInt(message_data.readBigUInt64LE(offset));
     offset = offset + 8;
-    const channels = parseInt(message_data.readBigUInt64LE(offset));
-    offset = offset + 8;
+    const channels = message_data.readUInt8(0);
+    offset = offset + 1;
     const imageData = message_data.subarray(offset);
     return { timestamp, rows, cols, channels, imageData };
   }
