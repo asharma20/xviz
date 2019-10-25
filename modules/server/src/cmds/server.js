@@ -69,6 +69,8 @@ export function serverArgs(inArgs, {defaultCommand = false} = {}) {
       },
       port: {
         describe: 'Port to listen on',
+        default: 8081,
+        type: 'number',
         group: 'Hosting Options:'
       },
       verbose: {

@@ -19,8 +19,8 @@ Start live XVIZ server:
 
 ```bash
 # Start server
+$ ./modules/server/bin/babel-xvizserver --live
 $ ./modules/server/bin/babel-xvizserver --live --port [visualizer port] -s [url of incoming data]
-$ ./modules/server/bin/babel-xvizserver --live --port 8081 -s 'ws://localhost:9997'
 
 ```
 
@@ -32,6 +32,8 @@ $ cd streetscape.gl
 
 # Install dependencies and build
 $ yarn bootstrap
+$ cd streetscape.gl/examples/website-demo/
+$ yarn
 
 # Link custom xviz parser to streetscape.gl for visualizer
 $ cd xviz/modules/parser
@@ -46,7 +48,6 @@ Start live XVIZ client:
 
 ```bash
 # Start client
-$ cd streetscape.gl/examples/website-demo/
 $ yarn start-live-local
 $ yarn start-live-local [--env.port=port number] [--env.maxConcurrency=number of workers]
 
