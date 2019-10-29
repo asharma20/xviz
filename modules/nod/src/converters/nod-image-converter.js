@@ -37,7 +37,9 @@ export class NodImageConverter {
 
   async convertMessage(message, xvizBuilder) {
     var image;
-    if (Object.keys(message.image).length === 0 && message.image.constructor === Object) {
+    if (message.datatype == 2) {
+      image = message.image;
+    } else {
       if (this.isRawBuffer) {
         this.prevImage.imageData = await sharp(this.prevImage.imageData, {
             raw: {
@@ -50,8 +52,6 @@ export class NodImageConverter {
           .toBuffer();
       }
       image = this.prevImage;
-    } else {
-      image = message.image;
     }
     const width = image.cols;
     const height = image.rows;

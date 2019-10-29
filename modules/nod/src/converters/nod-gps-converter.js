@@ -68,36 +68,9 @@ export class NodGPSConverter {
 
     // Just image data, use previous pose
     var pose = {};
-    var poseTrajectory = [];
-    if (message.pose.length == 0) {
-      if (this.poses.length == 0) { // Don't sent without pose data
-        pose = {
-          timestamp : message.image.timestamp / 1e9,
-          x: Number.MAX_VALUE,
-          y: Number.MAX_VALUE,
-          z: Number.MAX_VALUE,
-          roll: Number.MAX_VALUE,
-          pitch: Number.MAX_VALUE,
-          yaw: Number.MAX_VALUE
-        };
-        poseTrajectory = [[Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE]];
-        // return;
-      } else { // If message doesn't have pose data, send previous pose
-        var prev_pose = this.poses[this.poses.length-1];
-        pose = {
-          timestamp : prev_pose.timestamp,
-          x: prev_pose.x,
-          y: prev_pose.y,
-          z: prev_pose.z,
-          roll: prev_pose.roll,
-          pitch: prev_pose.pitch,
-          yaw: prev_pose.yaw
-        };
-        poseTrajectory = this._getPoseTrajectory();
-      }
-    } else {
-      var [timestamp, x, y, z, qx, qy, qz, qw] = message.pose;
-      timestamp = timestamp / 1e9;
+    const timestamp = message.timestamp / 1e9;
+    if (message.datatype == 1) {
+      var [x, y, z, qx, qy, qz, qw] = message.pose.poseData;
       const [roll, pitch, yaw] = this.quaternionToEulerAngle(qw, qx, qy, qz);
       pose = {
         timestamp,
@@ -108,9 +81,30 @@ export class NodGPSConverter {
         pitch,
         yaw
       };
-
       this.poses.push(pose);
-      poseTrajectory = this._getPoseTrajectory();
+    } else {
+      if (this.poses.length == 0) { // Don't sent without pose data
+        pose = {
+          timestamp,
+          x: Number.MAX_VALUE,
+          y: Number.MAX_VALUE,
+          z: Number.MAX_VALUE,
+          roll: Number.MAX_VALUE,
+          pitch: Number.MAX_VALUE,
+          yaw: Number.MAX_VALUE
+        };
+      } else { // If message doesn't have pose data, send previous pose
+        var prev_pose = this.poses[this.poses.length-1];
+        pose = {
+          timestamp,
+          x: prev_pose.x,
+          y: prev_pose.y,
+          z: prev_pose.z,
+          roll: prev_pose.roll,
+          pitch: prev_pose.pitch,
+          yaw: prev_pose.yaw
+        };
+      }
     }
 
     // Every message *MUST* have a pose. The pose can be considered

@@ -13,6 +13,7 @@
 // limitations under the License.
 import {NodGPSConverter} from './nod-gps-converter';
 import {NodImageConverter} from './nod-image-converter';
+import {NodLidarConverter} from './nod-lidar-converter';
 import {getDeclarativeUI} from './declarative-ui';
 import {XVIZBuilder, XVIZMetadataBuilder} from '@xviz/builder';
 
@@ -45,22 +46,23 @@ export class XVIZNodConverter {
 
     // Note: order is important due to data deps on the pose
     this.converters = [
-      gpsConverter,
-      new NodImageConverter(this.cameraName, this.imageOptions, this.options)
+      new NodGPSConverter(this.options),
+      new NodImageConverter(this.cameraName, this.imageOptions, this.options),
+      new NodLidarConverter(this.options)
     ];
   }
 
   _parsePose(message_data) {
     // Expects pose data: datatype, timestamp, pose (px py pz qx qy qz qw)
     var offset = 2;
-    var pose = [];
-    pose.push(parseInt(message_data.readBigUInt64LE(offset)));
+    const timestamp = parseInt(message_data.readBigUInt64LE(offset));
     offset = offset + 8;
+    var poseData = [];
     while (offset < message_data.length) {
-      pose.push(message_data.readDoubleLE(offset));
+      poseData.push(message_data.readDoubleLE(offset));
       offset = offset + 8;
     }
-    return pose;
+    return {timestamp, poseData};
   }
 
   _parseImage(message_data) {
@@ -78,6 +80,17 @@ export class XVIZNodConverter {
     return { timestamp, rows, cols, channels, imageData };
   }
 
+  _parseLidar(message_data) {
+    // Expects lidar data: datatype, timestamp, size, points
+    var offset = 2;
+    const timestamp = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const size = parseInt(message_data.readBigUInt64LE(offset));
+    offset = offset + 8;
+    const lidarPoints = message_data.subarray(offset);
+    return { timestamp, size, lidarPoints };
+  }
+
   async convertMessage(message_data, datatype) {
     // The XVIZBuilder provides a fluent API to construct objects.
     // This makes it easier to incrementally build objects that may have
@@ -89,15 +102,22 @@ export class XVIZNodConverter {
 
     try {
       // Parse raw buffer message into format
+      var timestamp;
       var pose = [];
       var image = {};
+      var lidar = {};
       var datatype = message_data.readUInt8(0);
       if (datatype == 1) {
         pose = this._parsePose(message_data);
-      } else {
+        timestamp = pose.timestamp;
+      } else if (datatype == 2) {
         image = this._parseImage(message_data);
+        timestamp = image.timestamp;
+      } else if (datatype == 3) {
+        lidar = this._parseLidar(message_data);
+        timestamp = lidar.timestamp;
       }
-      var message = {pose: pose, image: image};
+      var message = {datatype, timestamp, pose, image, lidar};
 
       // As builder instance is shared across all the converters, to avoid race conditions',
       // Need wait for each converter to finish
